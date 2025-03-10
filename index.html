@@ -28,8 +28,8 @@
     // Listen for authentication state changes.
     supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth event:", event, "Session:", session);
-      // Once a session exists, redirect to main.html (which should be in your public folder).
       if (session) {
+        // Redirect to main.html once a session is established.
         window.location.href = '/main.html';
       }
     });
@@ -37,11 +37,10 @@
     signInButton.addEventListener('click', async () => {
       messageDiv.textContent = "Redirecting to Google for sign in...";
       
-      // Start the OAuth flow with a redirect.
+      // Initiate the OAuth flow with a redirect to main.html.
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // Directly redirect to main.html after sign-in.
           redirectTo: window.location.origin + '/main.html'
         }
       });
