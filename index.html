@@ -17,31 +17,32 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // Initialize Supabase client
-    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co'; // Replace with your Supabase URL
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc'; // Replace with your actual anon/public key
+    // Initialize Supabase client with your project credentials.
+    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const signInButton = document.getElementById('google-signin');
     const messageDiv = document.getElementById('message');
 
-    // Debug: Listen for auth state changes and log them
+    // Listen for authentication state changes.
     supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth event:", event, "Session:", session);
+      // Once a session exists, redirect to main.html (which should be in your public folder).
       if (session) {
-        // Redirect to profile.html once the session exists.
-        window.location.href = 'main.html';
+        window.location.href = '/main.html';
       }
     });
 
     signInButton.addEventListener('click', async () => {
       messageDiv.textContent = "Redirecting to Google for sign in...";
       
-      // Initiate the OAuth flow using redirect mode.
+      // Start the OAuth flow with a redirect.
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/index.html' // Redirect to profile page after login
+          // Directly redirect to main.html after sign-in.
+          redirectTo: window.location.origin + '/main.html'
         }
       });
 
