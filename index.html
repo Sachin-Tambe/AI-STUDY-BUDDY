@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign In with Google using Supabase</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Sign In with Google</h1>
+    <button id="google-signin">Sign in with Google</button>
+    <div id="message"></div>
+  </div>
+
+  <!-- Import Supabase using ES modules -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // Initialize Supabase client
+    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co'; // Replace with your Supabase URL
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc'; // Replace with your actual anon/public key
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const signInButton = document.getElementById('google-signin');
+    const messageDiv = document.getElementById('message');
+
+    // Debug: Listen for auth state changes and log them
+    supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event, "Session:", session);
+      if (session) {
+        // Redirect to profile.html once the session exists.
+        window.location.href = 'main.html';
+      }
+    });
+
+    signInButton.addEventListener('click', async () => {
+      messageDiv.textContent = "Redirecting to Google for sign in...";
+      
+      // Initiate the OAuth flow using redirect mode.
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/index.html' // Redirect to profile page after login
+        }
+      });
+
+      if (error) {
+        messageDiv.textContent = "Error: " + error.message;
+        console.error("Error signing in:", error);
+      }
+    });
+  </script>
+</body>
+</html>
