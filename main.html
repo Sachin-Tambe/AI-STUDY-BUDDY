@@ -5,16 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Study Buddy - Your AI Learning Companion</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Spline viewer for 3D background -->
   <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-
-
+  <!-- Authentication Check using Supabase -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    
+    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    async function checkAuth() {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error fetching session:', error);
+      }
+      if (!session) {
+        alert('Please login first.');
+        window.location.href = 'index.html';
+      }
+    }
+    // Run authentication check before loading the rest of the page.
+    await checkAuth();
+  </script>
+  
   <!-- Spline 3D Background -->
   <spline-viewer url="https://prod.spline.design/wMKU-w8K9YWn0KKs/scene.splinecode"></spline-viewer>
+  
+  <!-- Navigation -->
   <nav>
     <div class="nav-links">
       <a href="#features">Features</a>
@@ -24,12 +45,14 @@
     </div>
     <a href="profile.html" class="profile-btn">Profile</a>
   </nav>
+  
+  <!-- Hero Section -->
   <section class="hero">
     <div>
       <h1>AI Study Buddy</h1>
     </div>
   </section>
-
+  
   <!-- Features Section with Slider Dots -->
   <section class="content-section" id="features">
     <h2>🌟 Features</h2>
@@ -112,7 +135,7 @@
       <div class="slider-dots" id="sliderDotsFeatures"></div>
     </div>
   </section>
-
+  
   <!-- Benefits Section with Slider -->
   <section class="content-section" id="benefits">
     <h2>🚀 Benefits</h2>
@@ -138,7 +161,7 @@
       <div class="slider-dots" id="sliderDotsBenefits"></div>
     </div>
   </section>
-
+  
   <!-- FAQ Section with Slider -->
   <section class="content-section" id="faq">
     <h2>❓ FAQ</h2>
@@ -164,24 +187,15 @@
       <div class="slider-dots" id="sliderDotsFaq"></div>
     </div>
   </section>
-
+  
+  <!-- Footer Section -->  
   <footer id="contact">
     <p>📧 Contact us: <a href="mailto:contact@aistudybuddy.com">contact@aistudybuddy.com</a></p>
     <p style="margin-top: 1rem;">© 2025 AI Study Buddy. All rights reserved.</p>
   </footer>
-
+  
+  <!-- Slider Dots Script -->
   <script>
-    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = "index.html"; // Redirect to login page
-      }
-    }
-    checkAuth();
     // Function to initialize slider dots for a given grid and dots container
     function initSliderDots(gridId, dotsContainerId) {
       const grid = document.getElementById(gridId);
@@ -209,34 +223,8 @@
         }
       });
     }
-
-    function initSliderDots(gridId, dotsContainerId) {
-      const grid = document.getElementById(gridId);
-      const dotsContainer = document.getElementById(dotsContainerId);
-      const cards = grid.querySelectorAll('.feature-card');
-      let currentIndex = 0;
-      dotsContainer.innerHTML = '';
-      cards.forEach((card, index) => {
-        const dot = document.createElement('div');
-        dot.classList.add('slider-dot');
-        if (index === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => {
-          grid.scrollTo({ left: card.offsetLeft, behavior: 'smooth' });
-        });
-        dotsContainer.appendChild(dot);
-      });
-      grid.addEventListener('scroll', () => {
-        const newIndex = Math.round(grid.scrollLeft / (cards[0].offsetWidth + 32));
-        if (newIndex !== currentIndex) {
-          currentIndex = newIndex;
-          const dots = dotsContainer.querySelectorAll('.slider-dot');
-          dots.forEach((dot, idx) => {
-            dot.classList.toggle('active', idx === currentIndex);
-          });
-        }
-      });
-    }
-
+  
+    // Initialize slider dots for each section when the document loads
     document.addEventListener("DOMContentLoaded", () => {
       initSliderDots("featuresGrid", "sliderDotsFeatures");
       initSliderDots("benefitsGrid", "sliderDotsBenefits");
