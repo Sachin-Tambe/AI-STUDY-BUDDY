@@ -170,7 +170,16 @@
   </footer>
 
   <script>
+    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "index.html"; // Redirect to login page
+      }
+    }
     // Function to initialize slider dots for a given grid and dots container
     function initSliderDots(gridId, dotsContainerId) {
       const grid = document.getElementById(gridId);

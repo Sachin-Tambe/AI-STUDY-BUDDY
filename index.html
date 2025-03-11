@@ -30,7 +30,7 @@
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         console.log("Existing session found:", session);
-        window.location.href = '/profile.html';
+        window.location.href = '/main.html';
       }
     }
     checkSession();
@@ -39,7 +39,7 @@
     supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth event:", event, "Session:", session);
       if (session) {
-        window.location.href = '/profile.html';
+        window.location.href = '/main.html';
       }
     });
 
@@ -52,7 +52,7 @@
         provider: 'google',
         options: {
           // Ensure this redirect URL is whitelisted in your Supabase project's authentication settings.
-          redirectTo: window.location.origin + '/profile.html'
+          redirectTo: window.location.origin + '/main.html'
         }
       });
 
