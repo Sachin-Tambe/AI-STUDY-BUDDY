@@ -20,9 +20,9 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // Supabase setup with environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // Supabase setup
+    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // DOM elements
@@ -33,7 +33,7 @@
     const lastLoginDateEl = document.getElementById('last-login-date');
     const logoutBtn = document.getElementById('logout');
 
-    // Avatar error handler: Use fallback if avatar fails
+    // Avatar error handler: In case the avatar fails to load, use fallback
     avatarEl.onerror = () => {
       const userName = nameEl.textContent || 'User';
       console.error("Avatar failed to load. Using fallback avatar.");
@@ -43,33 +43,39 @@
     // Load profile data
     async function loadProfile() {
       try {
-        // Ensure session is detected
-        const { data: session, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !session?.user) {
-          console.error("No session detected:", sessionError);
+        // Get the current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        console.log('User object:', user); // Debug log for user data
+        if (authError || !user) {
           window.location.href = '/index.html';
           return;
         }
-
-        const user = session.user;
-        console.log("User:", user);
 
         // Set name and email
         const displayName = user.user_metadata?.name || user.email || 'User';
         nameEl.textContent = displayName;
         emailEl.textContent = user.email;
 
-        // Set avatar - priority: Google identity picture > metadata > fallback
+        // Set avatar - Updated Google picture retrieval
         const identities = user.identities || [];
-        const googleAvatar = identities[0]?.identity_data?.picture;
+        const identityData = identities[0]?.identity_data || {};
+        const googleAvatar = identityData.picture;
         const metadataAvatar = user.user_metadata?.picture;
 
+        console.log("Google Avatar:", googleAvatar);
+        console.log("Metadata Avatar:", metadataAvatar);
+
+        // Priority: Google identity picture > metadata picture > fallback
         if (googleAvatar) {
           avatarEl.src = googleAvatar;
+          console.log("Using Google avatar");
         } else if (metadataAvatar) {
           avatarEl.src = metadataAvatar;
+          console.log("Using metadata avatar");
         } else {
-          avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+          const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+          avatarEl.src = fallbackUrl;
+          console.log("Using fallback avatar:", fallbackUrl);
         }
 
         // Streak logic
@@ -81,7 +87,6 @@
           .single();
 
         if (userDataError || !userData) {
-          // First-time login, insert new streak record
           await supabase.from('User_Data').insert([{
             id: user.id,
             streak: 1,
@@ -93,15 +98,16 @@
           return;
         }
 
-        // Calculate streak
         const lastLogin = userData.last_login;
-        const daysDiff = Math.floor((new Date(currentDayLogin) - new Date(lastLogin)) / 86400000);
-        let newStreak = userData.streak;
+        const daysDiff = Math.floor(
+          (new Date(currentDayLogin) - new Date(lastLogin)) / 86400000
+        );
 
+        let newStreak = userData.streak;
         if (daysDiff === 1) {
-          newStreak += 1; // Continue streak
+          newStreak += 1;
         } else if (daysDiff > 1) {
-          newStreak = 1; // Reset streak
+          newStreak = 1;
         }
 
         if (daysDiff !== 0) {
@@ -113,7 +119,7 @@
         }
 
         streakCountEl.textContent = newStreak;
-        lastLoginDateEl.textContent = currentDayLogin;
+        lastLoginDateEl.textContent = userData.last_login;
 
       } catch (error) {
         console.error("Error:", error);
