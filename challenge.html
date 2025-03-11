@@ -17,7 +17,10 @@
     }
     .challenge-answer {
       margin-left: 1em;
-      white-space: pre-wrap; /* Preserve line breaks if any */
+      white-space: pre-wrap;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -70,7 +73,6 @@
     <div id="solved-challenges-section">
       <h2>Solved Challenges</h2>
       <ul id="solved-challenges-list"></ul>
-      <!-- Button for toggling the display -->
       <button id="toggle-challenges-btn" class="toggle-btn" style="display:none;">Show All Solved Challenges</button>
     </div>
   </div>
@@ -85,14 +87,16 @@
     // -------------------------
     // 2. SUPABASE INITIALIZATION
     // -------------------------
-    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc';
+    // Use environment variables for Supabase URL and anon key
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // -------------------------
     // 3. GOOGLE GEN AI SETUP
     // -------------------------
-    const API_KEY = 'AIzaSyC6LfVj7_SQQVjkm8Dmd4_eihzjvGz9v40';
+    // Use environment variable for Google API Key
+    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -101,24 +105,25 @@
     // -------------------------
     let acceptedQuestion = '';
     let currentUser = null;
-    let showAllChallenges = false; // toggle to show all or only the last challenge
+    let showAllChallenges = false; // Toggle to show all or only the last challenge
 
     // -------------------------
     // 5. LOAD PROFILE
     // -------------------------
     async function loadProfile() {
       try {
-        // Get current user from Supabase
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
+        // Retrieve current session from Supabase
+        const { data: session, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session?.user) {
           alert('No user is signed in. Redirecting to login...');
           window.location.href = '/index.html';
           return;
         }
+        const user = session.user;
         currentUser = user;
         document.getElementById('user-info').textContent = `Signed in as: ${user.email}`;
 
-        // Fetch user_stats row to get solved challenges using correct column name
+        // Fetch user statistics (solved challenges)
         const { data: userStats, error: statsError } = await supabase
           .from('user_stats')
           .select('solved_challenges')
@@ -154,7 +159,7 @@
       const listEl = document.getElementById('solved-challenges-list');
       listEl.innerHTML = '';
       
-      // If no challenges, simply exit.
+      // If no challenges, display a placeholder message.
       if (!challenges || challenges.length === 0) {
         listEl.innerHTML = '<li>No challenges solved yet.</li>';
         document.getElementById('toggle-challenges-btn').style.display = 'none';
@@ -225,7 +230,7 @@
     }
 
     // -------------------------
-    // 9. ACCEPT / REJECT
+    // 9. ACCEPT / REJECT QUESTION
     // -------------------------
     document.getElementById('accept-btn').addEventListener('click', () => {
       const questionText = document.getElementById('question-display').textContent;
@@ -270,11 +275,12 @@
 
       if (isCorrect) {
         // Insert the challenge record into "challenges"
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
+        const { data: session, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session?.user) {
           alert('User not authenticated.');
           return;
         }
+        const user = session.user;
         const insertResponse = await supabase
           .from('challenges')
           .insert([{
@@ -340,7 +346,7 @@
     });
 
     // -------------------------
-    // 13. ATTACH EVENT LISTENERS & INIT
+    // 13. ATTACH EVENT LISTENERS & INITIALIZE
     // -------------------------
     document.getElementById('generate-btn').addEventListener('click', generateQuestion);
     document.getElementById('submit-answer-btn').addEventListener('click', submitAnswer);
