@@ -17,32 +17,41 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // Initialize Supabase client using environment variables.
-    // These variables should be defined in your .env file (e.g. .env.local for Next.js)
-    // and injected at build time.
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // Initialize Supabase client with your project credentials.
+    const supabaseUrl = 'https://ibngcsvefwihtvcavkcd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlibmdjc3ZlZndpaHR2Y2F2a2NkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NDI5MzMsImV4cCI6MjA1NzAxODkzM30.qLj2SS2JGEyITEaa0-AjF7BnNNpXL3yHKJBdWHdsIgc';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const signInButton = document.getElementById('google-signin');
     const messageDiv = document.getElementById('message');
 
+    // Check immediately if a session already exists (in case of a previous login)
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        console.log("Existing session found:", session);
+        window.location.href = '/main.html';
+      }
+    }
+    checkSession();
+
     // Listen for authentication state changes.
     supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth event:", event, "Session:", session);
       if (session) {
-        // Redirect to main.html once a session is established.
         window.location.href = '/main.html';
       }
     });
 
+    // Click handler for the Google sign-in button.
     signInButton.addEventListener('click', async () => {
       messageDiv.textContent = "Redirecting to Google for sign in...";
-
+      
       // Initiate the OAuth flow with a redirect to main.html.
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
+          // Ensure this redirect URL is whitelisted in your Supabase project's authentication settings.
           redirectTo: window.location.origin + '/main.html'
         }
       });
@@ -50,6 +59,8 @@
       if (error) {
         messageDiv.textContent = "Error: " + error.message;
         console.error("Error signing in:", error);
+      } else {
+        console.log("OAuth initiated:", data);
       }
     });
   </script>
