@@ -30,7 +30,7 @@
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         console.log("Existing session found:", session);
-        window.location.href = '/main.html';
+        window.location.href = '/profile.html';
       }
     }
     checkSession();
