@@ -39,7 +39,7 @@
     supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth event:", event, "Session:", session);
       if (session) {
-        window.location.href = '/main.html';
+        window.location.href = '/profile.html';
       }
     });
 
