@@ -30,6 +30,7 @@
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         console.log("Existing session found:", session);
+        996
         window.location.href = '/main.html';
       }
     }
