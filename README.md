@@ -134,8 +134,8 @@ streamlit run backend/app.py
 Feel free to reach out or contribute:
 
 * 💼 Author: Sachin
-* 🌐 GitHub: [your-username](https://github.com/Sachin-Tambe)
-* 📧 Email: [your-email@example.com](mailto:tambesachin347@example.com)
+* 🌐 GitHub: [Sachin-Tambe](https://github.com/Sachin-Tambe)
+* 📧 Email: [tambesachin347@example.com](mailto:tambesachin347@example.com)
 
 ---
 
